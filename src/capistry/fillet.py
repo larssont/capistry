@@ -124,8 +124,8 @@ class FilletStrategy(Comparable, ABC):
     """
     Abstract base class for `capistry.Cap` fillet strategies.
 
-    Defines the interface for applying various types of fillets to keyboard caps
-    including `capistry.MXStem`, `capistry.ChocStem`, and any other `capistry.Cap` subclasses.
+    Defines the interface for applying various types of fillets to caps
+    such as `capistry.TrapezoidCap`, `capistry.RectangularCap`, and any other `capistry.Cap` subclasses.
     Provides common parameters and methods for inner and skirt filleting
     while leaving outer fillet implementation to concrete subclasses.
 

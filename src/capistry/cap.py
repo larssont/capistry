@@ -96,23 +96,23 @@ class Cap(Comparable, ABC):
     Parameters
     ----------
     width : float, default=18
-        Width of the keycap in millimeters. Standard keycap width is 18mm.
+        Width of the keycap in millimeters.
     length : float, default=18
-        Length of the keycap in millimeters. Standard keycap length is 18mm.
+        Length of the keycap in millimeters.
     height : float, default=4
-        Total height of the keycap in millimeters. Includes wall thickness.
+        Total height of the keycap in millimeters. Includes roof thickness.
     wall : float, default=1
-        Thickness of the keycap walls in millimeters. Affects structural strength.
+        Thickness of the keycap walls in millimeters.
     roof : float, default=1
-        Thickness of the keycap top surface in millimeters.
+        Thickness of the keycap top surface in millimeters (assuming no surface mapping).
     taper : Taper, default=Taper()
-        Taper configuration for the keycap sides. Controls how sides slope inward.
+        Taper configuration for the keycap sides.
     surface : Surface or None, default=None
-        Optional surface mapping for the keycap top. Adds texture or curvature.
+        Optional surface mapping for the keycap top.
     stem : Stem, default=MXStem()
-        Stem type and configuration for switch attachment. Determines compatibility.
+        Stem which will be attached to the the keycap's body.
     fillet_strategy : FilletStrategy, default=FilletUniform()
-        Strategy for applying fillets to the keycap geometry. Controls edge rounding.
+        Strategy for applying fillets to the keycap geometry.
 
     Attributes
     ----------
@@ -175,7 +175,7 @@ class Cap(Comparable, ABC):
     This is an abstract base class and cannot be instantiated directly.
     Use concrete implementations like RectangularCap, TrapezoidCap, etc.
 
-    The geometry building process is automatic via the __post_init__ method,
+    The geometry building process is triggered automatically in the __post_init__ method,
     but can be manually triggered with the build() method if parameters are changed.
     """
 
@@ -865,9 +865,8 @@ class TrapezoidCap(Cap):
     """
     Keycap with trapezoidal profile.
 
-    A keycap where the top surface is wider than the base, with the width
-    expansion determined by the angle parameter. The trapezoid shape is
-    symmetric, expanding equally on both sides from the base to the top.
+    A symmetric keycap where the top surface is wider than the base, with the width
+    expansion determined by the angle parameter.
 
     Parameters
     ----------

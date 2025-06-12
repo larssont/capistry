@@ -123,7 +123,7 @@ def polygon_height(n, radius, inradius=True):
     radius : float
         The radius value. Interpreted as inradius if `inradius` is True,
         otherwise as circumradius.
-    inradius : bool, optional
+    inradius : bool, default=True
         Whether the given radius is the inradius (True) or
         circumradius (False). Default is True.
 
@@ -165,7 +165,7 @@ def polygon_area(n, radius, inradius=False):
     radius : float
         The radius value. Interpreted as inradius if `inradius` is True,
         otherwise as circumradius.
-    inradius : bool, optional
+    inradius : bool, default=False
         Whether the given radius is the inradius (True) or
         circumradius (False). Default is False.
 
@@ -203,7 +203,7 @@ def polygon_prism_surface(n, radius, height, inradius=False):
         otherwise as circumradius.
     height : float
         Height of the prism.
-    inradius : bool, optional
+    inradius : bool, default=False
         Whether the given radius is the inradius (True) or
         circumradius (False). Default is False.
 

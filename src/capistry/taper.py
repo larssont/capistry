@@ -65,9 +65,6 @@ class Taper(Comparable):
     The Taper class inherits from Comparable, enabling comparison operations
     and integration with metric systems. All transformation methods return
     new instances rather than modifying the original taper in-place.
-
-    Units are not enforced by the class itself - they depend on the application
-    context.
     """
 
     front: float = 0.0
@@ -147,8 +144,7 @@ class Taper(Comparable):
 
         Constrains each taper value to lie within [min_value, max_value] by
         setting values below `min_value` to `min_value` and values above `max_value`
-        to `max_value`. This is useful for enforcing manufacturing constraints,
-        safety limits, or valid parameter ranges.
+        to `max_value`.
 
         Parameters
         ----------

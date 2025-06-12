@@ -106,7 +106,8 @@ class Stem(Comparable, Compound, ABC):
     operations and 3D geometry representation. All concrete implementations must
     provide a _builder method that defines the specific stem geometry.
 
-    Stems are automatically split at the XY plane to remove excess support material.
+    Stems are automatically split at the XY plane at the end of the  build phase
+    to remove excess support material.
     """
 
     center_at: CenterOf = field(default=CenterOf.GEOMETRY)
@@ -346,9 +347,9 @@ class ChocStem(Stem):
     """
     Concrete implementation of a Kailh Choc V1 compatible keycap stem.
 
-    Creates a specialized stem design for Kailh Choc V1 low-profile switches,
-    featuring dual legs with optional arched profiles and cross-shaped support
-    structures.
+    Stem design compatible with Kailh Choc V1 low-profile switches,
+    featuring dual legs with optional arched profiles and a cross-shaped support
+    structure.
 
     Parameters
     ----------
@@ -367,8 +368,8 @@ class ChocStem(Stem):
         Only used when include_arc is True. Higher values create arcs
         closer to the leg tips.
     arc_width_ratio : float, default=0.25
-        Ratio of leg width for arc sagitta depth (0.0 to 1.0). Controls
-        how pronounced the leg curvature is when arched legs are enabled.
+        Ratio of leg width for arc sagitta depth (0.0 to 1.0). Higher values create
+        arcs with an apex closer to the center of the legs.
     cross_length : float, default=3.7
         Length of the cross support arms (Y-dimension) in millimeters.
     cross_width : float, default=0.45
