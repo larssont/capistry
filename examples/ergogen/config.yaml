@@ -1,0 +1,62 @@
+points:
+  zones:
+    thumb:
+      key:
+        spread: 0
+        padding: 0
+      columns:
+        col_1:
+          key:
+            rotate: -5
+        col_2:
+          key:
+            shift: [20.472, -3.4]
+            rotate: -15
+        col_3:
+          key:
+            shift: [40.373, -10.373]
+            rotate: -25
+        col_4:
+          key:
+            shift: [59.075, -20.823]
+            rotate: -35
+      rows:
+        row:
+outlines:
+  thumb:
+  - what: polygon
+    where: thumb_col_1_row
+    adjust:
+      rotate: 5
+    points:
+    - shift: [-10.105, 9.521]
+    - shift: [21.452, 0]
+    - shift: [-3.725, -21.126]
+    - shift: [-17.727, 3.126]
+  - what: polygon
+    where: thumb_col_2_row
+    adjust:
+      rotate: 5
+    points:
+    - shift: [-10.231, 11.14]
+    - shift: [22.06, 0]
+    - shift: [-4.334, -24.577]
+    - shift: [-17.727, 3.126]
+  - what: polygon
+    where: thumb_col_3_row
+    adjust:
+      rotate: 5
+    points:
+    - shift: [-10.37, 12.771]
+    - shift: [22.678, 0]
+    - shift: [-4.952, -28.082]
+    - shift: [-17.727, 3.126]
+  - what: polygon
+    where: thumb_col_4_row
+    adjust:
+      rotate: 5
+    points:
+    - shift: [-10.518, 14.413]
+    - shift: [23.306, 0]
+    - shift: [-5.579, -31.641]
+    - shift: [-17.727, 3.126]

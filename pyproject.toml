@@ -1,0 +1,72 @@
+[project]
+name = "capistry"
+version = "0.1.0"
+description = "A Python package for parametric 3D modeling of keyboard keycaps."
+
+authors = [
+  { name = "Tommy Larsson"}
+]
+license = "MPL-2.0"
+license-files = [
+    "LICENSE.md",
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "build123d>=0.9.1,<1",
+    "rich>=14.0.0,<15",
+    "mashumaro>=3.16,<4", 
+    "more-itertools>=10.7.0,<11",
+    "attrs>=25.3.0,<26",
+    "tzdata>=2025.2",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
+keywords = [
+  "cad",
+  "keycap",
+  "3d modeling",
+  "3d printing"
+]
+
+[project.urls]
+Homepage = "https://github.com/larssont/capistry"
+Repository = "https://github.com/larssont/capistry"
+Issues = "https://github.com/larssont/capistry/issues"
+
+[tool.ruff]
+line-length = 100
+ignore = ["F403", "F405", "E731"]
+
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-xdist",
+  "pytest-sugar",
+  "pytest-cov",
+  "removestar",
+  "hypothesis[cli]",
+  "icecream",
+  "pylint",
+  "pdoc",
+  "ocp_vscode",
+]
+
+[tool.basedpyright]
+typeCheckingMode = "basic"
+reportUnusedImport = "none"
+reportUndefinedVariable = "warning"
+reportUnusedCallResult = "none"
+
+[tool.pytest.ini_options]
+addopts = """
+  --cov=src
+  --cov-report=term-missing
+  --cov-report=html
+  """
