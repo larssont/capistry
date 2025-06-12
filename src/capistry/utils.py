@@ -35,16 +35,15 @@ def spaced_points(
     ----------
     n : int
         Number of points to generate. Must be positive.
-    tolerance : float, optional
-        Minimum distance between any two consecutive points in circular order,
-        by default 0.0
-    start : float, optional
-        Start of the interval (inclusive), by default 0.0
-    end : float, optional
-        End of the interval (exclusive), by default 1.0
-    rand : random.Random or None, optional
+    tolerance : float, default=0.0
+        Minimum distance between any two consecutive points in circular order.
+    start : float, default=0.0
+        Start of the interval (inclusive).
+    end : float, default=1.0
+        End of the interval (exclusive).
+    rand : random.Random or None, default=None
         Random generator instance for reproducible results. If None, uses the
-        default random module, by default None
+        default random module.
 
     Returns
     -------

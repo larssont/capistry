@@ -252,7 +252,7 @@ class BaseComparer[T](ABC):
     Abstract base class for all comparers.
 
     Provides the core functionality for comparing multiple objects that
-    implement the Comparable protocol. Builds comparison tables by aligning
+    implement the Comparable ABC. Builds comparison tables by aligning
     metrics across objects and handling missing metrics gracefully.
 
     Parameters
@@ -405,7 +405,7 @@ class BaseComparer[T](ABC):
 
         Constructs the complete comparison table by organizing metrics into
         sections, aligning metrics across objects, and handling missing metrics.
-        Groups are sorted by order value, then alphabetically by title.
+        Groups are sorted by `MetricGroup.order` value, then alphabetically by title.
 
         Returns
         -------
