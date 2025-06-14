@@ -4,17 +4,19 @@ Fillet strategies for keycaps.
 This module provides various fillet strategies for applying rounded edges to
 keyboard caps including MXStem, ChocStem, and other Cap-type classes. The strategies
 allow for customizable filleting of outer edges, inner edges, and skirt areas.
-e
+
 Classes
 -------
 FilletStrategy : ABC
     Abstract base class for all fillet strategies.
 FilletUniform : FilletStrategy
     Applies uniform outer fillets to all edges.
-FilletSidesFirst : FilletStrategy
-    Applies differentiated fillets to sides before other edges.
-FilletSidesLast : FilletStrategy
-    Applies differentiated fillets to sides after other edges.
+FilletWidthDepth : FilletStrategy
+    Applies differentiated fillets left-to-right, then front-to-back.
+FilletDepthWidth : FilletStrategy
+    Applies differentiated fillets front-to-back, then left-to-right.
+FilletMiddleTop : FilletStrategy
+    Applies differentiated fillets to mid-height edges, then top perimeter.
 
 Functions
 ---------
@@ -33,7 +35,18 @@ from collections.abc import Iterable
 from dataclasses import dataclass, fields
 from typing import Self
 
-from build123d import Axis, BuildPart, ChamferFilletType, Curve, Part, Select, Sketch, fillet
+from build123d import (
+    Axis,
+    BuildPart,
+    ChamferFilletType,
+    Curve,
+    Face,
+    Part,
+    Select,
+    ShapeList,
+    Sketch,
+    fillet,
+)
 
 from capistry.compare import Comparable, Metric, MetricGroup, MetricLayout
 
@@ -89,10 +102,10 @@ def fillet_safe(
         The Build123d objects (edges, faces) to fillet.
     radius : float
         The fillet radius in millimeters.
-    threshold : float, default 1e-6
+    threshold : float, default=1e-6
         The minimum radius required to attempt a fillet operation.
         Values less than or equal to this will skip the operation.
-    err : bool, default True
+    err : bool, default=True
         Whether to raise FilletError on failure. If False, returns None on failure.
 
     Returns
@@ -136,7 +149,7 @@ class FilletStrategy(Comparable, ABC):
     Abstract base class for `capistry.Cap` fillet strategies.
 
     Defines the interface for applying various types of fillets to caps
-    such as `capistry.TrapezoidCap`, `capistry.RectangularCap`, and any other `capistry.Cap`
+    such as `capistry.TrapezoidCap`, `capistry.RectangularCap`, or any other `capistry.Cap`
     subclasses. Provides common parameters and methods for inner and skirt filleting
     while leaving outer fillet implementation to concrete subclasses.
 
@@ -304,16 +317,16 @@ class FilletUniform(FilletStrategy):
 
 
 @dataclass
-class FilletSidesFirst(FilletStrategy):
+class FilletWidthDepth(FilletStrategy):
     """
-    Directional fillet strategy applying side fillets before other edges.
+    Directional fillet strategy applying width edges (left/right) before depth edges (front/back).
 
     Parameters
     ----------
     front : float, default=3.0
-        Radius in mm for front edge fillets (positive Y direction).
+        Radius in mm for front edge fillets (negative Y direction).
     back : float, default=2.0
-        Radius in mm for back edge fillets (negative Y direction).
+        Radius in mm for back edge fillets (positive Y direction).
     left : float, default=1.0
         Radius in mm for left side fillets (negative X direction).
     right : float, default=1.0
@@ -331,16 +344,13 @@ class FilletSidesFirst(FilletStrategy):
 
     def apply_outer(self, p: BuildPart):
         """
-        Apply directional outer fillets with sides processed first.
-
-        Applies different fillet radii to each side of the keycap, with
-        side edges processed last.
+        Apply outer fillet radii with (left/right) processed first.
 
         Parameters
         ----------
         p : BuildPart
-            The BuildPart representing a Cap instance (MXStem, choc, etc.) to
-            which directional outer fillets should be applied.
+            The BuildPart representing a `capistry.Cap` instance to
+            which outer fillets should be applied.
         """
         logger.debug(
             "Applying outer fillets (sides-first)",
@@ -359,20 +369,20 @@ class FilletSidesFirst(FilletStrategy):
 
 
 @dataclass
-class FilletSidesLast(FilletStrategy):
+class FilletDepthWidth(FilletStrategy):
     """
-    Directional fillet strategy applying side fillets after other edges.
+    Directional fillet strategy applying depth edges (front/back) before width edges (left/right).
 
     Parameters
     ----------
     front : float, default=2.0
-        Radius in mm for front edge fillets (minimum Y direction).
+        Radius in mm for front edge fillets (negative Y direction).
     back : float, default=1.0
-        Radius in mm for back edge fillets (maximum Y direction).
+        Radius in mm for back edge fillets (positive Y direction).
     left : float, default=3.0
-        Radius in mm for left side fillets (minimum X direction).
+        Radius in mm for left side fillets (negative X direction).
     right : float, default=3.0
-        Radius in mm for right side fillets (maximum X direction).
+        Radius in mm for right side fillets (positive X direction).
     skirt : float, default=0.25
         Inherited from FilletStrategy. Radius for bottom face edge fillets.
     inner : float, default 1.0
@@ -386,16 +396,13 @@ class FilletSidesLast(FilletStrategy):
 
     def apply_outer(self, p: BuildPart):
         """
-        Apply directional outer fillets with sides processed last.
-
-        Applies different fillet radii to each side of the keycap, with
-        side edges processed last.
+        Apply outer fillet radii with (left/right) processed last.
 
         Parameters
         ----------
         p : BuildPart
-            The BuildPart representing a Cap instance (MXStem, choc, etc.) to
-            which directional outer fillets should be applied.
+            The BuildPart representing a `capistry.Cap` instance to
+            which outer fillets should be applied.
         """
         logger.debug(
             "Applying outer fillets (sides-last)",
@@ -411,3 +418,66 @@ class FilletSidesLast(FilletStrategy):
         fillet_safe(p.faces().sort_by(Axis.Z)[-1].edges().sort_by(Axis.X)[-1], self.right)
         fillet_safe(p.faces().sort_by(Axis.Y)[0].edges().sort_by(Axis.Z)[1:], self.front)
         fillet_safe(p.faces().sort_by(Axis.Y)[-1].edges().sort_by(Axis.Z)[1:], self.back)
+
+
+@dataclass
+class FilletMiddleTop(FilletStrategy):
+    """
+    Fillet strategy that applies middle-height edges first, then top face edges.
+
+    Parameters
+    ----------
+    top : float, default=0.75
+        Radius for the topmost edge fillets (upper Z direction).
+    middle : float, default=2.5
+        Radius for edges located in the mid-section of the part.
+    skirt : float, default=0.25
+        Inherited from FilletStrategy. Radius for bottom face edge fillets.
+    inner : float, default=1.0
+        Inherited from FilletStrategy. Radius for internal Z-axis edge fillets.
+    """
+
+    top: float = 0.75
+    middle: float = 2.5
+
+    def apply_outer(self, p: BuildPart):
+        """
+        Apply mid-section and top edge fillets to the outer geometry.
+
+        First applies fillets to mid-height vertical or slanted edges,
+        followed by fillets on the uppermost perimeter.
+
+        Parameters
+        ----------
+        p : BuildPart
+            The BuildPart representing a Cap instance (e.g., MXStem or Choc).
+        """
+        logger.debug(
+            "Applying outer fillets (top-to-middle)",
+            extra={"top": self.top, "middle": self.middle},
+        )
+
+        def faces() -> ShapeList[Face]:
+            # Sort faces by height (Z) and prioritize side faces
+            # (i.e., those with normals not closely aligned with Z).
+            return (
+                p.faces()
+                .sort_by(Axis.Z, reverse=True)
+                .sort_by(lambda f: abs(f.normal_at().dot(Axis.Z.direction)))
+            )
+
+        # Fillet mid-height edges on side faces:
+        #   - Exclude top/bottom Z-aligned faces (last two in list).
+        #   - Use `% 0.5` to find the edge tangent at midpoint.
+        #   - Keep edges with significant vertical (Z) tangent component.
+        fillet_safe(
+            faces()[:-2].edges().filter_by(lambda e: abs((e % 0.5).Z) > 0.5),  # noqa: PLR2004
+            self.middle,
+        )
+
+        # Fillet the topmost usable face's edges:
+        #   - From last two faces, pick the highest one by Z position.
+        fillet_safe(
+            faces()[-2:].sort_by(Axis.Z)[-1].edges(),
+            self.top,
+        )
