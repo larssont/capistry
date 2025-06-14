@@ -319,7 +319,7 @@ class Panel:
 
     items: list[PanelItem]
     col_count: int | None = None
-    sprue: Sprue | None = SprueCylinder()
+    sprue: Sprue | None = field(default_factory=SprueCylinder)
     gap: float = 1
     show_progress: bool = True
 

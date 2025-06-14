@@ -1,17 +1,16 @@
 import math
-from math import sqrt
+from math import pi, sqrt
 
-from build123d import *
+from build123d import CenterOf, Location
 from hypothesis import given
-from ocp_vscode import *
 
-from capistry import *
+from capistry import ChocStem, MXStem, Stem
 from tests.util.approximate import approx_eq, approx_ge, approx_le
-from tests.util.strategy import *
+from tests.util.strategy import stems, stems_choc, stems_mx
 
 
 def is_stem_valid(stem: Stem):
-    """Asserts that the given Stem object meets all criterias."""
+    """Asserts that the given Stem object meets all criteria."""
 
     assert stem.area > 0, f"Invalid stem: area must be > 0, got {stem.area}"
     assert stem.volume > 0, f"Invalid stem: volume must be > 0, got {stem.volume}"

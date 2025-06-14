@@ -8,10 +8,11 @@ object introspection utilities.
 
 import math
 import random
-from functools import cached_property, reduce
+from collections.abc import Iterable
+from functools import reduce
 from itertools import islice, tee
 from operator import mul
-from typing import Any, Iterable
+from typing import Any
 
 from build123d import Location, Shape
 
@@ -358,32 +359,3 @@ def is_zeroish(*values: float, abs_tol: float = 1e-10) -> bool:
     effectively performing |value - 0| <= abs_tol for each value.
     """
     return all(math.isclose(v, 0.0, abs_tol=abs_tol) for v in values)
-
-
-def clear_cached_properties(obj: Any) -> list[str]:
-    """
-    Clear all cached_property values from an object's instance dictionary.
-
-    Removes all cached values for properties decorated with @cached_property
-    from the object's __dict__, forcing them to be recalculated on next access.
-    This is useful for invalidating cached computations when underlying data changes.
-
-    Parameters
-    ----------
-    obj : Any
-        The object instance whose cached properties should be cleared.
-        Must be an instance of a class that may have cached_property decorators.
-
-    Returns
-    -------
-    list[str]
-        A list of attribute names that were cleared from the object's __dict__.
-        Empty list if no cached properties were found or none were cached.
-    """
-    cleared = []
-    for attr in dir(type(obj)):
-        if isinstance(getattr(type(obj), attr, None), cached_property):
-            if attr in obj.__dict__:
-                cleared.append(attr)
-                obj.__dict__.pop(attr, None)
-    return cleared

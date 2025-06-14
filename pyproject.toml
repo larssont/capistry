@@ -19,7 +19,7 @@ requires-python = ">=3.13"
 dependencies = [
     "build123d>=0.9.1,<1",
     "rich>=14.0.0,<15",
-    "mashumaro>=3.16,<4", 
+    "mashumaro>=3.16,<4",
     "more-itertools>=10.7.0,<11",
     "attrs>=25.3.0,<26",
     "tzdata>=2025.2",
@@ -45,8 +45,46 @@ Issues = "https://github.com/larssont/capistry/issues"
 
 [tool.ruff]
 line-length = 100
-ignore = ["F403", "F405", "E731"]
 
+[tool.ruff.lint]
+select = [
+  "D",
+  "B",      # flake8-bugbear
+  "TC",     # flake8-type-checking
+  "C4",     # Helps you write better list/set/dict comprehensions.
+  "E",      # pycodestyle errors
+  "FA",     # Verifies files use from __future__ import annotations if a type is used in the module that can be rewritten using PEP 563.
+  "F",      # pyflakes
+  "G",      # Better usage of built-in logging
+  "I",      # isort - Import sorting
+  "LOG",    # Checks for issues using the standard library logging module.
+  "PL",     # pylint
+  "PYI",    # Linting rules for type annotations.
+  "Q",      # Linting rules for quites
+  "RUF",    # Ruff lint
+  "TID",    # Helps you write tidier imports.
+  "UP",     # pyupgrade
+  "W",      # pycodestyle warnings
+  "SIM",    # flake8-simplify
+  "TRY",    # Tryceratops - For those who like dinosaurs 🦖 and clean try/except ✨ blocks.
+]
+
+ignore = [
+  "TRY003" # Checks for long exception messages that are not defined in the exception class itself.
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/tests/**/*.py" = ["PLR2004", "D", "PLR0913"]
+"examples/**/*.py" = ["PLR2004", "D", "F403", "F405"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.codespell]
+skip = "*.lock, *.step"
+count = true
+quiet-level = 3
+ignore-words-list = "strat"
 
 [dependency-groups]
 dev = [
@@ -60,6 +98,8 @@ dev = [
   "pylint",
   "pdoc",
   "ocp_vscode",
+  "codespell",
+  "pre-commit"
 ]
 
 [tool.basedpyright]

@@ -34,7 +34,7 @@ def test_fillet_safe(part: Part, radius: float, fail: bool):
     st.booleans(),
 )
 def test_fillet_safe_fail(part: Part, radius: float, fail: bool):
-    call = partial(fillet_safe, part.edges(), radius, fail)
+    call = partial(fillet_safe, part.edges(), radius, err=fail)
 
     if fail:
         with pytest.raises(FilletError):

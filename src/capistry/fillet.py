@@ -29,8 +29,9 @@ FilletError : Exception
 
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from dataclasses import dataclass, fields
-from typing import Iterable, Self
+from typing import Self
 
 from build123d import Axis, BuildPart, ChamferFilletType, Curve, Part, Select, Sketch, fillet
 
@@ -73,20 +74,24 @@ class FilletError(Exception):
 def fillet_safe(
     objects: ChamferFilletType | Iterable[ChamferFilletType],
     radius: float,
+    threshold: float = 1e-6,
     err: bool = True,
 ) -> Sketch | Part | Curve | None:
     """
     Safely apply a fillet to objects with error handling.
 
     Attempts to apply a fillet operation to the specified `ChamferFilletType`s (i.e. edges).
-    Only applies the fillet if it is above the minimum threshold of 1e-6.
+    Only applies the fillet if it is above the threshold.
 
     Parameters
     ----------
     objects : ChamferFilletType or Iterable[ChamferFilletType]
         The Build123d objects (edges, faces) to fillet.
     radius : float
-        The fillet radius in millimeters. Must be > 1e-6 to be applied.
+        The fillet radius in millimeters.
+    threshold : float, default 1e-6
+        The minimum radius required to attempt a fillet operation.
+        Values less than or equal to this will skip the operation.
     err : bool, default True
         Whether to raise FilletError on failure. If False, returns None on failure.
 
@@ -101,12 +106,11 @@ def fillet_safe(
     FilletError
         When fillet operation fails and err=True.
     """
-
-    if radius > 1e-6:
+    if radius > threshold:
         try:
             return fillet(objects=objects, radius=radius)
         except Exception as e:
-            logger.error(
+            logger.exception(
                 "Failed to apply fillet",
                 extra={
                     "radius": radius,
@@ -115,7 +119,14 @@ def fillet_safe(
                 exc_info=e,
             )
             if err:
-                raise FilletError(radius, type(objects).__name__, e)
+                raise FilletError(radius, type(objects).__name__, e) from e
+    else:
+        logger.debug(
+            "Radius %.6f is below threshold %.6f — skipping fillet",
+            radius,
+            threshold,
+        )
+
     return None
 
 
@@ -125,8 +136,8 @@ class FilletStrategy(Comparable, ABC):
     Abstract base class for `capistry.Cap` fillet strategies.
 
     Defines the interface for applying various types of fillets to caps
-    such as `capistry.TrapezoidCap`, `capistry.RectangularCap`, and any other `capistry.Cap` subclasses.
-    Provides common parameters and methods for inner and skirt filleting
+    such as `capistry.TrapezoidCap`, `capistry.RectangularCap`, and any other `capistry.Cap`
+    subclasses. Provides common parameters and methods for inner and skirt filleting
     while leaving outer fillet implementation to concrete subclasses.
 
     Parameters
@@ -230,7 +241,7 @@ class FilletStrategy(Comparable, ABC):
         numerics = [
             f.name
             for f in fields(self)
-            if not f.name.startswith("_") and isinstance(getattr(self, f.name), (int, float))
+            if not f.name.startswith("_") and isinstance(getattr(self, f.name), int | float)
         ]
 
         return MetricLayout(
@@ -251,6 +262,7 @@ class FilletStrategy(Comparable, ABC):
         )
 
     def __str__(self) -> str:
+        """Return the class name as the string representation."""
         return type(self).__name__
 
 

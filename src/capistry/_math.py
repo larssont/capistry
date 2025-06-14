@@ -98,7 +98,7 @@ def polygon_width(n, radius, inradius=True):
     ValueError
         If n < 3 (polygon must have at least 3 sides).
     """
-    if n < 3:
+    if n < 3:  # noqa: PLR2004
         raise ValueError("Polygon must have at least 3 sides.")
 
     angle = pi / n
@@ -142,16 +142,16 @@ def polygon_height(n, radius, inradius=True):
     For even-sided polygons, the height is twice the inradius.
     For odd-sided polygons, the height is the sum of inradius and circumradius.
     """
-    if n < 3:
+    if n < 3:  # noqa: PLR2004
         raise ValueError("Polygon must have at least 3 sides.")
 
     actual_inradius = radius if inradius else radius * cos(pi / n)
 
     if n % 2 == 0:
         return 2 * actual_inradius
-    else:
-        circumradius = radius / cos(pi / n) if inradius else radius
-        return actual_inradius + circumradius
+
+    circumradius = radius / cos(pi / n) if inradius else radius
+    return actual_inradius + circumradius
 
 
 def polygon_area(n, radius, inradius=False):
@@ -179,7 +179,7 @@ def polygon_area(n, radius, inradius=False):
     ValueError
         If n < 3 (polygon must have at least 3 sides).
     """
-    if n < 3:
+    if n < 3:  # noqa: PLR2004
         raise ValueError("Polygon must have at least 3 sides.")
 
     if inradius:
@@ -217,7 +217,7 @@ def polygon_prism_surface(n, radius, height, inradius=False):
     ValueError
         If n < 3 (polygon must have at least 3 sides).
     """
-    if n < 3:
+    if n < 3:  # noqa: PLR2004
         raise ValueError("Polygon must have at least 3 sides.")
 
     base_area = polygon_area(n, radius, inradius)

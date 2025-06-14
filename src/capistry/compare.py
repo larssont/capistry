@@ -1,4 +1,6 @@
 """
+Module to compare objects using defined metrics and generate detailed comparison tables.
+
 A flexible module for comparing objects with structured metrics and generating
 rich comparison tables. This module provides abstract base classes and concrete
 implementations for defining comparable objects and visualizing their differences.
@@ -46,11 +48,12 @@ Examples
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from decimal import Decimal as Dec
 from functools import cached_property
 from numbers import Number
-from typing import Any, Callable, Self, TypeVar
+from typing import Any, Self, TypeVar
 
 from rich import box
 from rich.align import Align
@@ -247,7 +250,7 @@ class TableSection:
     rows: tuple[TableRow, ...]
 
 
-class BaseComparer[T](ABC):
+class BaseComparer[T]:
     """
     Abstract base class for all comparers.
 
@@ -393,7 +396,7 @@ class BaseComparer[T](ABC):
         names: list[str] = []
         for metric_map in self._metrics_map:
             # Find keys for this group title
-            for g_title, metric_name in metric_map.keys():
+            for g_title, metric_name in metric_map:
                 if g_title == group_title and metric_name not in seen:
                     seen.add(metric_name)
                     names.append(metric_name)
@@ -613,15 +616,17 @@ class Comparer(BaseComparer[T]):
         str
             Formatted string representation of the value.
         """
-        if isinstance(val, bool):
-            return "✔" if val else "✖"
-        elif isinstance(val, Number):
-            return str(round(Dec(str(val)), precision))
-        elif isinstance(val, (list, tuple)):
-            return ", ".join(str(v) for v in val)
-        elif val is None:
-            return "-"
-        return str(val)
+        match val:
+            case bool() as b:
+                return "✔" if b else "✖"
+            case Number() as n:
+                return str(round(Dec(str(n)), precision))
+            case list() | tuple() as seq:
+                return ", ".join(str(v) for v in seq)
+            case None:
+                return "-"
+            case _:
+                return str(val)
 
     def _format_delta(self, current: Any, previous: Any, precision: int) -> str:
         """
@@ -648,14 +653,13 @@ class Comparer(BaseComparer[T]):
         try:
             delta = current - previous
             if not isinstance(delta, int | float | Dec):
-                raise TypeError
+                return ""
             if delta == 0:
                 return ""
-
-            rounded = round(Dec(str(abs(delta))), precision)
-            sign = "+" if delta > 0 else "-"
-            color = "green" if delta > 0 else "red"
-            return f"[{color}]{sign}{rounded}[/{color}] "
         except TypeError:
-            pass
-        return ""
+            return ""
+
+        rounded = round(Dec(str(abs(delta))), precision)
+        sign = "+" if delta > 0 else "-"
+        color = "green" if delta > 0 else "red"
+        return f"[{color}]{sign}{rounded}[/{color}] "

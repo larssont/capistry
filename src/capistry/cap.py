@@ -1,5 +1,5 @@
 """
-Keycap modeling with customizable profiles and geometry.
+Keycap shapes with customizable profiles and geometry.
 
 This module defines classes for modeling mechanical keyboard keycaps with four
 main profile types: trapezoidal, slanted, skewed, and rectangular. It supports
@@ -31,6 +31,7 @@ Trapezoid shaped keycap with 15 degree angle:
 Slanted keycap for thumb keys:
 >>> cap = SlantedCap(width=18, length=18, angle=10)
 >>> mirrored_cap = cap.mirrored()  # Create mirrored variant
+
 Notes
 -----
 The `Cap` class inherits from Comparable, enabling comparing properties
@@ -247,7 +248,7 @@ class Cap(Comparable, ABC):
         """
         self._clear_cache()
         _ = self.compound
-        logger.debug(f"Successfully built {type(self).__name__}")
+        logger.debug("Successfully built %s", type(self).__name__)
         return self
 
     def _clear_cache(self):
@@ -283,7 +284,8 @@ class Cap(Comparable, ABC):
         A manual rebuild of this property can be triggered by calling `capistry.Cap.build`.
         """
         logger.info(
-            f"Creating part geometry for {type(self).__name__}",
+            "Creating part geometry for %s",
+            type(self).__name__,
             extra={"dimensions": {"w": self.width, "l": self.length, "h": self.height}},
         )
 
@@ -300,8 +302,9 @@ class Cap(Comparable, ABC):
             return Compound(label=str(self), children=[cap.part, self.stem])
 
         except Exception as e:
-            logger.error(
-                f"Failed to build {type(self).__name__} geometry",
+            logger.exception(
+                "Failed to build %s geometry",
+                type(self).__name__,
                 exc_info=e,
             )
             raise
@@ -582,7 +585,7 @@ class Cap(Comparable, ABC):
         the inner cavity face of the keycap. The connection uses a rigid joint
         with 180-degree X rotation to orient the stem correctly.
         """
-        logger.info(f"Attaching {type(self.stem).__name__} to {type(self).__name__}")
+        logger.info("Attaching %s to %s", type(self.stem).__name__, type(self).__name__)
 
         bottomf = self.outline.faces()[0]
         topf = p.faces().filter_by(Axis.Z).sort_by(Axis.Z)[1]
@@ -625,7 +628,7 @@ class Cap(Comparable, ABC):
         and splitting it with the surface shape to achieve the desired
         top surface profile.
         """
-        logger.debug(f"Applying surface map to {type(self).__name__}")
+        logger.debug("Applying surface map to %s", type(self).__name__)
 
         bottom = self._build_skeleton(self.height - self.roof)
         bottomf = bottom.faces().sort_by(Axis.Z)[-1]
@@ -657,7 +660,7 @@ class Cap(Comparable, ABC):
             geometry that can be modified without affecting the original.
         """
         cloned = deepcopy(self)
-        logger.debug(f"Created clone of {type(self).__name__}")
+        logger.debug("Created clone of %s", type(self).__name__)
         return cloned
 
     def mirrored(self) -> Self:
@@ -683,7 +686,7 @@ class Cap(Comparable, ABC):
         if m.surface is not None:
             m.surface = m.surface.mirrored()
         m.build()
-        logger.debug(f"Created mirrored clone of {type(self).__name__}")
+        logger.debug("Created mirrored clone of %s", type(self).__name__)
         return m
 
     def _mirror(self) -> Self:
@@ -704,7 +707,7 @@ class Cap(Comparable, ABC):
         This method modifies the keycap parameters in-place. It is called
         by the mirrored() method as part of the cloning process.
         """
-        logger.debug(f"Mirroring {type(self).__name__} with no changes")
+        logger.debug("Mirroring %s with no changes", type(self).__name__)
         return self
 
     def locate(self, loc: Location) -> Self:
@@ -729,7 +732,8 @@ class Cap(Comparable, ABC):
         >>> cap.locate(Pos(10, 20, 5) * Rot(0, 0, 45))
         """
         logger.debug(
-            f"Applying absolute location to {type(self).__name__}",
+            "Applying absolute location to %s",
+            type(self).__name__,
             extra={"location": loc},
         )
         self.compound.locate(loc)
@@ -759,7 +763,7 @@ class Cap(Comparable, ABC):
         --------
         >>> cap.rotate(Axis.Z, 10)  # Rotate 10 degrees around Z-axis
         """
-        logger.debug(f"Rotating {type(self).__name__}", extra={"axis": axis, "angle": angle})
+        logger.debug("Rotating %s", type(self).__name__, extra={"axis": axis, "angle": angle})
         self.compound.rotate(axis, angle)
         return self
 
@@ -786,7 +790,8 @@ class Cap(Comparable, ABC):
         >>> cap.move(Pos(0, 0, -2) * Rot(Y=10))  # Move down and tilt
         """
         logger.debug(
-            f"Applying relative location to {type(self).__name__}",
+            "Applying relative location to %s",
+            type(self).__name__,
             extra={"location": loc},
         )
         self.compound.move(loc)
@@ -889,7 +894,7 @@ class TrapezoidCap(Cap):
 
     def __post_init__(self) -> None:
         """Initialize the trapezoid keycap with logging."""
-        logger.info(f"Creating {type(self).__name__}", extra={"angle": self.angle})
+        logger.info("Creating %s", type(self).__name__, extra={"angle": self.angle})
         return super().__post_init__()
 
     @override
@@ -910,7 +915,7 @@ class TrapezoidCap(Cap):
         The trapezoid is constructed with the bottom edge as the base and
         the top edge expanded symmetrically on both sides.
         """
-        logger.debug(f"Drawing outline of {type(self).__name__}")
+        logger.debug("Drawing outline of %s", type(self).__name__)
 
         width_top = 2 * self.length * tan(radians(self.angle)) + self.width
 
@@ -962,6 +967,7 @@ class SlantedCap(Cap):
     A keycap where one side is angled relative to the other, creating an
     asymmetric profile. This design is commonly used for thumb keys or
     ergonomic layouts where the key needs to match the natural arc of the thumbs.
+
     Parameters
     ----------
     angle : float, default=0
@@ -1021,7 +1027,7 @@ class SlantedCap(Cap):
         adjusting the side angles accordingly. Positive angles create
         a rightward slant, negative angles create a leftward slant.
         """
-        logger.debug(f"Drawing outline of {type(self).__name__}", extra={"angle": self.angle})
+        logger.debug("Drawing outline of %s", type(self).__name__, extra={"angle": self.angle})
 
         width_top = (
             self.width / cos(radians(self.angle)) + tan(radians(abs(self.angle))) * self.length
@@ -1068,7 +1074,8 @@ class SlantedCap(Cap):
         creating the opposite-handed version.
         """
         logger.debug(
-            f"Mirroring {type(self).__name__} by inverting angle",
+            "Mirroring %s by inverting angle",
+            type(self).__name__,
             extra={"angle": self.angle, "new_angle": -self.angle},
         )
         self.angle *= -1
@@ -1166,7 +1173,7 @@ class SkewedCap(Cap):
         Sketch
             2D sketch of the skewed outline.
         """
-        logger.debug(f"Drawing outline of {type(self).__name__}", extra={"skew": self.skew})
+        logger.debug("Drawing outline of %s", type(self).__name__, extra={"skew": self.skew})
 
         with BuildSketch():
             with BuildLine():
@@ -1197,7 +1204,8 @@ class SkewedCap(Cap):
         creating the opposite-handed version.
         """
         logger.debug(
-            f"Mirroring {type(self).__name__} by inverting",
+            "Mirroring %s by inverting",
+            type(self).__name__,
             extra={"skew": self.skew, "new_skew": -self.skew},
         )
         self.skew *= -1
@@ -1270,7 +1278,7 @@ class RectangularCap(Cap):
         Sketch
             2D sketch of the rectangular outline.
         """
-        logger.debug(f"Drawing outline of {type(self).__name__}")
+        logger.debug("Drawing outline of %s", type(self).__name__)
 
         with BuildSketch():
             with BuildLine():

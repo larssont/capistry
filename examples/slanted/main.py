@@ -1,5 +1,3 @@
-# ruff: noqa: F403, F405
-
 import logging
 from pathlib import Path
 
@@ -48,7 +46,7 @@ caps: list[SlantedCap] = [
 
 cap_count = 4
 
-for i in range(cap_count - 1):
+for _ in range(cap_count - 1):
     last = caps[-1]
     cap = last.clone()
     cap.length = last.right.length
