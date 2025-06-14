@@ -1,4 +1,4 @@
-name: Documentation
+name: Deploy Documentation
 
 # build the documentation whenever there are new commits on main
 on:
