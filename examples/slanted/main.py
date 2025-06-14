@@ -46,7 +46,7 @@ caps: list[SlantedCap] = [
 
 cap_count = 4
 
-for _ in range(cap_count - 1):
+for i in range(cap_count - 1):
     last = caps[-1]
     cap = last.clone()
     cap.length = last.right.length
