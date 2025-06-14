@@ -1,15 +1,16 @@
 """
 .. include:: ../../README.md
-"""
+"""  # noqa: D200, D400
 
 from .cap import Cap, RectangularCap, SkewedCap, SlantedCap, TrapezoidCap
 from .compare import BaseComparer, Comparer
 from .ergogen import Ergogen, ErgogenSchema
 from .fillet import (
-    FilletSidesFirst,
-    FilletSidesLast,
+    FilletDepthWidth,
+    FilletMiddleTop,
     FilletStrategy,
     FilletUniform,
+    FilletWidthDepth,
     fillet_safe,
 )
 from .logger import init_logger
@@ -20,29 +21,30 @@ from .surface import Surface
 from .taper import Taper
 
 __all__ = [
+    "BaseComparer",
     "Cap",
+    "ChocStem",
+    "Comparer",
+    "Ergogen",
+    "ErgogenSchema",
+    "FilletDepthWidth",
+    "FilletMiddleTop",
+    "FilletStrategy",
+    "FilletUniform",
+    "FilletWidthDepth",
+    "MXStem",
+    "Panel",
+    "PanelItem",
     "RectangularCap",
     "SkewedCap",
     "SlantedCap",
-    "TrapezoidCap",
-    "FilletSidesFirst",
-    "FilletSidesLast",
-    "FilletStrategy",
-    "FilletUniform",
-    "fillet_safe",
-    "Panel",
-    "PanelItem",
-    "Comparer",
-    "BaseComparer",
-    "ChocStem",
-    "MXStem",
-    "Stem",
-    "Surface",
-    "Taper",
-    "init_logger",
     "Sprue",
     "SprueCylinder",
     "SpruePolygon",
-    "Ergogen",
-    "ErgogenSchema",
+    "Stem",
+    "Surface",
+    "Taper",
+    "TrapezoidCap",
+    "fillet_safe",
+    "init_logger",
 ]

@@ -38,20 +38,28 @@ c1 = RectangularCap(
     roof=roof,
     taper=taper,
     stem=stem,
-    fillet_strategy=FilletUniform(),
+    fillet_strategy=FilletUniform(),  # Uniform fillet, every outside edge gets the same radius
 )
 
+# Fillet left-to-right, then front-to-back
 c2 = c1.clone()
-c2.fillet_strategy = FilletSidesFirst()
+c2.fillet_strategy = FilletWidthDepth()
 c2.build()
 c2.locate(c1.top_right * Pos(X=gap))
 
+# Fillet front-to-back, then left-to-right
 c3 = c1.clone()
-c3.fillet_strategy = FilletSidesLast()
+c3.fillet_strategy = FilletDepthWidth()
 c3.build()
 c3.locate(c2.top_right * Pos(X=gap))
 
-caps = [c1.compound, c2.compound, c3.compound]
+# Fillet middle edges first, then top perimeter
+c4 = c1.clone()
+c4.fillet_strategy = FilletMiddleTop()
+c4.build()
+c4.locate(c3.top_right * Pos(X=gap))
+
+caps = [c1.compound, c2.compound, c3.compound, c4.compound]
 
 show(*caps)
 

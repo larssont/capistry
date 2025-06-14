@@ -16,9 +16,9 @@
 </p>
 
 <p align="center">
-  <img 
-      src="assets/img/cover.png" 
-      style="max-width: 480px; width: 80%" 
+  <img
+      src="assets/img/cover.png"
+      style="max-width: 480px; width: 80%"
       alt="Rendered keycap model created with Capistry"
   />
 </p>
@@ -161,16 +161,19 @@ cap = RectangularCap(taper=taper)
 ### Fillet Strategies
 Choose how edges are rounded:
 ```python
-# Uniform filleting
-fillet_strat = FilletUniform()
+# Uniform
+strat = FilletUniform()
 
-# Sides-first filleting
-fillet_strat = FilletSidesFirst()
+# Front-to-back, then left-to-right
+strat = FilletDepthWidth()
 
-# Sides-Last filleting
-fillet_strat = FilletSidesFirst()
+# Left-to-right, then front-to-back
+strat = FilletWidthDepth()
 
-cap = RectangularCap(fillet_strategy=fillet_strat)
+# Mid-height edges, then top-perimeter
+strat = FilletMiddleTop()
+
+cap = RectangularCap(fillet_strategy=strat)
 ```
 
 > [!WARNING]
@@ -214,8 +217,8 @@ cap = RectangularCap()
 
 # Create a 4x4 panel of a keycap
 panel = Panel(
-    items=[PanelItem(cap, quantity=16)], 
-    sprue=SprueCylinder(), 
+    items=[PanelItem(cap, quantity=16)],
+    sprue=SprueCylinder(),
     cols=4
 )
 
