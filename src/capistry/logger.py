@@ -21,7 +21,7 @@ Examples
 Display logs using default level:
 >>> init_logger()
 
-Display minimum debug logs with custom date fomat:
+Display minimum debug logs with custom date format:
 >>> init_logger(level=logging.DEBUG, datefmt="%m/%d/%Y %I:%M:%S %p")
 """
 

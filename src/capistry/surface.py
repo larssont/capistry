@@ -22,7 +22,7 @@ from numbers import Number
 from typing import Any, Self
 
 from attrs import Attribute, define, field
-from attrs.validators import *
+from attrs.validators import optional
 from build123d import Face, Vector, Vertex
 from more_itertools import all_equal, collapse, flatten
 
@@ -32,7 +32,10 @@ from capistry.utils import mirror_matrix, rotate_matrix
 logger = logging.getLogger(__name__)
 
 
-def _matrix_2x2(_: Any, attribute: Attribute, value: Any) -> None:
+_NUM_FACE_VERTICES = 4
+
+
+def _matrix_validator(_: Any, attribute: Attribute, value: Any) -> None:
     """
     Validate that value is a 2D numeric matrix with minimum dimensions.
 
@@ -54,21 +57,26 @@ def _matrix_2x2(_: Any, attribute: Attribute, value: Any) -> None:
     TypeError
         If value is not a list, contains non-list rows, or has non-numeric elements.
     ValueError
-        If matrix has fewer than 2 rows, unequal row lengths, or fewer than 2 columns.
+        If matrix has fewer than 2 rows, unequal row lengths, or fewer
+        than 2 columns.
 
     Examples
     --------
     Valid 2x2 matrix:
-    >>> _matrix_2x2(None, attr, [[1.0, 2.0], [3.0, 4.0]])  # No exception
+    >>> _matrix_validator(None, attr, [[1.0, 2.0], [3.0, 4.0]])  # No exception
 
     Invalid dimensions:
-    >>> _matrix_2x2(None, attr, [[1.0]])  # Raises ValueError
+    >>> _matrix_validator(None, attr, [[1.0]])  # Raises ValueError
     """
+    min_matrix_dim = 2
+
     if not isinstance(value, list):
         raise TypeError(f"'{attribute.name}' must be a list (got {type(value).__name__})")
 
-    if len(value) < 2:
-        raise ValueError(f"'{attribute.name}' must have at least 2 rows (got {len(value)})")
+    if len(value) < min_matrix_dim:
+        raise ValueError(
+            f"'{attribute.name}' must have at least {min_matrix_dim} rows (got {len(value)})"
+        )
 
     if not all(isinstance(row, list) for row in value):
         raise TypeError(f"All rows in '{attribute.name}' must be lists")
@@ -77,11 +85,13 @@ def _matrix_2x2(_: Any, attribute: Attribute, value: Any) -> None:
     if not all_equal(row_lengths):
         raise ValueError(f"All rows in '{attribute.name}' must be the same length")
 
-    if row_lengths[0] < 2:
-        raise ValueError(f"Each row in '{attribute.name}' must have at least 2 columns")
+    if row_lengths[0] < min_matrix_dim:
+        raise ValueError(
+            f"Each row in '{attribute.name}' must have at least {min_matrix_dim} columns"
+        )
 
     if not all(
-        (isinstance(item, (int, float)) and not isinstance(item, bool))
+        (isinstance(item, int | float) and not isinstance(item, bool))
         for row in value
         for item in row
     ):
@@ -125,8 +135,10 @@ class Surface(Comparable):
     transformation methods return new instances without modifying the original.
     """
 
-    offsets: list[list[float | int]] = field(validator=_matrix_2x2)
-    weights: list[list[float | int]] | None = field(default=None, validator=optional(_matrix_2x2))
+    offsets: list[list[float | int]] = field(validator=_matrix_validator)
+    weights: list[list[float | int]] | None = field(
+        default=None, validator=optional(_matrix_validator)
+    )
 
     @weights.validator
     def _validate_weights(self, attribute: Attribute, value: list[list[float | int]] | None):
@@ -159,9 +171,12 @@ class Surface(Comparable):
         if min_weight < 1:
             shift = 1 - min_weight
             logger.warning(
-                f"Non-positive weights detected (min = {min_weight}); "
-                f"shifting all weights by +{shift} to preserve relative influence."
+                "Non-positive weights detected (min = %s); "
+                "shifting all weights by +%s to preserve relative influence.",
+                min_weight,
+                shift,
             )
+
             self.weights = [[w + shift for w in row] for row in self.weights]
 
     @classmethod
@@ -431,8 +446,8 @@ class Surface(Comparable):
         Parameters
         ----------
         face | Face
-            A Build123D Face object with exactly 4 corner vertices that define the
-            surface boundaries.
+            A Build123D Face object with exactly `_NUM_FACE_VERTICES` (4) corner vertices
+            that define the surface boundaries.
 
         Returns
         -------
@@ -459,9 +474,9 @@ class Surface(Comparable):
         then by X-coordinate (left to right) to ensure consistent orientation.
         """
         vertices = face.vertices()
-        if len(vertices) != 4:
+        if len(vertices) != _NUM_FACE_VERTICES:
             raise ValueError(
-                f"Expected exactly 4 vertices to define the surface corners, "
+                f"Expected exactly {_NUM_FACE_VERTICES} vertices to define the surface corners, "
                 f"but received {len(vertices)}."
             )
 
@@ -509,7 +524,7 @@ class Surface(Comparable):
         Parameters
         ----------
         vertices : list[Vertex]
-            List of exactly 4 vertices to sort.
+            List of exactly `_NUM_FACE_VERTICES` (4) vertices to sort.
 
         Returns
         -------
@@ -521,8 +536,11 @@ class Surface(Comparable):
         ValueError
             If the number of vertices is not exactly 4.
         """
-        if len(vertices) != 4:
-            raise ValueError(f"Expected exactly 4 vertices to sort, but received {len(vertices)}.")
+        if len(vertices) != _NUM_FACE_VERTICES:
+            raise ValueError(
+                f"Expected exactly {_NUM_FACE_VERTICES} vertices to sort, "
+                f"but received {len(vertices)}."
+            )
         by_y = sorted(vertices, key=lambda v: v.Y, reverse=True)
         top, bottom = by_y[:2], by_y[2:]
         tl, tr = sorted(top, key=lambda v: v.X)

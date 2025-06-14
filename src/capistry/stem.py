@@ -167,7 +167,6 @@ class Stem(Comparable, Compound, ABC):
         like fillets at the stem base, which require existing geometry to
         fillet against, then removes this support geometry after processing.
         """
-        pass
 
     @property
     def metrics(self) -> MetricLayout[Self]:

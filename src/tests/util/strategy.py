@@ -6,15 +6,15 @@ used in capistry tests. Defaults suit most cases but are customizable.
 """
 
 import logging
+from collections.abc import Callable
 from dataclasses import MISSING, fields
 from enum import Enum
 from math import pi
-from typing import Any, Callable, Type, TypeVar
+from typing import Any, TypeVar
 
 from build123d import BuildLine, BuildSketch, CenterOf, Circle, Polyline, Vector, Vertex, make_face
 from hypothesis import strategies as st
 from more_itertools import interleave_longest, repeatfunc
-from ocp_vscode import *
 
 from capistry.fillet import FilletError
 from capistry.sprue import Sprue, SprueCylinder, SpruePolygon
@@ -70,13 +70,13 @@ def unwrap(
     return _draw(draw, fn(x), condition)
 
 
-def any_except(*exclude: Type):
+def any_except(*exclude: type):
     """Strategy for any type except given types."""
     return st.from_type(type).flatmap(st.from_type).filter(lambda x: not isinstance(x, exclude))
 
 
 def sample_near(
-    val: int | float, n: int = 3, pct: float = 10.0, include_val: bool = True
+    val: float, n: int = 3, pct: float = 10.0, include_val: bool = True
 ) -> st.SearchStrategy:
     """
     Sample values near val by percentage steps.
@@ -131,12 +131,13 @@ class NumProfile(Enum):
     GEOMETRY = "geometry"
 
     def bounds(self) -> tuple[float, float]:
-        if self is NumProfile.DEFAULT:
-            return (-100000, 100000)
-        elif self is NumProfile.GEOMETRY:
-            return (1e-6, 1000)
-        else:
-            raise TypeError(f"Unsupported profile {self}")
+        match self:
+            case NumProfile.DEFAULT:
+                return (-100_000, 100_000)
+            case NumProfile.GEOMETRY:
+                return (1e-6, 1000)
+            case _:
+                raise TypeError(f"Unsupported profile {self}")
 
 
 def ints(
@@ -192,14 +193,16 @@ def angles_radians(
 @st.composite
 def tensors(
     draw,
-    value: Any = st.integers(-100, 100),
-    shape: tuple[int | st.SearchStrategy[int]] = (
-        st.integers(2, 10),
-        st.integers(2, 10),
-    ),
+    value: Any = None,
+    shape: tuple[int | st.SearchStrategy[int]] | None = None,
     dynamic: bool = False,
 ) -> Any:
     """Generate nested lists with given shape and values."""
+    if value is None:
+        value = st.integers(-100, 100)
+    if shape is None:
+        shape = (st.integers(2, 10), st.integers(2, 10))
+
     if not isinstance(shape, tuple):
         raise TypeError(f"`shape` must be a tuple, got {type(shape).__name__!r}")
 
@@ -248,13 +251,16 @@ def tapers(
 @st.composite
 def faces(
     draw,
-    size: int | float | st.SearchStrategy[int | float] = ints(10, 100),
+    size: float | st.SearchStrategy[int | float] | None = None,
     vertices: int | st.SearchStrategy[int] = 4,
 ):
     """Generate polygon face by sampling a circle outline."""
     vertices = unwrap(draw, vertices)
     if vertices < 3:
         raise ValueError("Polygon must have at least 3 sides")
+
+    if size is None:
+        size = ints(10, 100)
 
     outline = Circle(unwrap(draw, size)).edges()[0]
     vertices = [outline @ x for x in spaced_points(vertices, tolerance=0.025, rand=draw(randoms()))]
@@ -270,11 +276,18 @@ def faces(
 @st.composite
 def vectors(
     draw,
-    x: float | st.SearchStrategy[float] = floats(min_value=-100, max_value=100),
-    y: float | st.SearchStrategy[float] = floats(min_value=-100, max_value=100),
-    z: float | st.SearchStrategy[float] = floats(min_value=-100, max_value=100),
+    x: float | st.SearchStrategy[float] = None,
+    y: float | st.SearchStrategy[float] = None,
+    z: float | st.SearchStrategy[float] = None,
 ) -> Vector:
     """Generate build123d.Vector with optional coordinates."""
+    if x is None:
+        x = floats(min_value=-100, max_value=100)
+    if y is None:
+        y = floats(min_value=-100, max_value=100)
+    if z is None:
+        z = floats(min_value=-100, max_value=100)
+
     return Vector(unwrap(draw, x), unwrap(draw, y), unwrap(draw, z))
 
 
@@ -297,13 +310,15 @@ def vertices(
 @st.composite
 def sprues_polygon(
     draw: st.DrawFn,
-    min_diameter: float = MIN_GEOMETRY_VALUE,
-    max_diameter: float = MAX_GEOMETRY_VALUE,
-    sides: int | st.SearchStrategy[int] = ints(3, 10),
+    diameteter: float | st.SearchStrategy[float] | None = None,
+    sides: int | st.SearchStrategy[int] = None,
 ) -> SpruePolygon:
     """Generate SpruePolygon."""
+    if sides is None:
+        sides = ints(3, 10)
+
     return SpruePolygon(
-        diameter=draw(floats(min_diameter, max_diameter)),
+        diameter=draw(floats(profile=NumProfile.GEOMETRY)),
         inset=draw(st.one_of(st.none(), floats())),
         sides=unwrap(draw, sides),
     )
@@ -336,12 +351,21 @@ def sprues(draw: st.DrawFn) -> Sprue:
 @st.composite
 def surfaces(
     draw,
-    offset: int | float | st.SearchStrategy[int | float] = ints(-100, 100),
-    weight: int | float | st.SearchStrategy[int | float] = ints(1, 100),
-    rows: int | st.SearchStrategy[int] = ints(2, 10),
-    cols: int | st.SearchStrategy[int] = ints(2, 10),
+    offset: float | st.SearchStrategy[int | float] = None,
+    weight: float | st.SearchStrategy[int | float] = None,
+    rows: int | st.SearchStrategy[int] = None,
+    cols: int | st.SearchStrategy[int] = None,
 ) -> Surface:
     """Generate Surface with offsets and optional weights."""
+    if offset is None:
+        offset = ints(-100, 100)
+    if weight is None:
+        weight = ints(1, 100)
+    if rows is None:
+        rows = ints(2, 10)
+    if cols is None:
+        cols = ints(2, 10)
+
     rows = unwrap(draw, rows)
     cols = unwrap(draw, cols)
 

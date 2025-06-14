@@ -1,10 +1,12 @@
 """
+Module for generating Ergogen-compatible YAML configurations from `capistry.Cap` objects.
+
 This module provides utilities for generating Ergogen-compatible YAML
 configuration files from one or more `capistry.Cap` objects. It translates 3D
 geometries into logical keyboard layouts (`points`) and outline shapes
 (`outlines`) suitable for use in Ergogen-based keyboard designs.
 
-The output is structured according to Ergogen’s configuration schema,
+The output is structured according to Ergogen's configuration schema,
 supporting transformation, spacing, and customizable naming schemes.
 
 Classes
@@ -58,12 +60,13 @@ Notes
 """
 
 import logging
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass, field
 from decimal import Decimal as Dec
 from itertools import pairwise
 from numbers import Number
-from typing import Any, Callable, NamedTuple, Self
+from typing import Any, NamedTuple, Self
 
 import yaml
 from build123d import Location, Rot, Sketch, Vector, Vertex
@@ -132,6 +135,8 @@ class YAMLMixin(DataClassYAMLMixin):
     """
 
     class Config(BaseConfig):
+        """Mashumaro configuration."""
+
         omit_none = True
         omit_default = False
         sort_keys = False
@@ -171,12 +176,15 @@ class Shift(NamedTuple):
         return Shift(x=v.X, y=v.Y)
 
     def __iter__(self):
+        """Iterate over the x and y components as a tuple."""
         return iter([self.x, self.y])
 
     def __add__(self, other: Self) -> "Shift":
+        """Add two Shift objects component-wise."""
         return Shift(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other: Self) -> "Shift":
+        """Subtract two Shift objects component-wise."""
         return Shift(self.x - other.x, self.y - other.y)
 
 
@@ -385,7 +393,7 @@ class OutlineShape(YAMLMixin):
             Point(shift=curr.shift - prev.shift) for prev, curr in pairwise(points)
         ]
 
-        logger.debug(f"Created {type(cls).__name__} with {len(points)} points.")
+        logger.debug("Created %s with %s points.", type(cls).__name__, len(points))
         return cls(points=points, where=where, adjust=adjust)
 
 
@@ -520,8 +528,12 @@ class ErgogenConfig(YAMLMixin):
 @dataclass(init=False)
 class Ergogen:
     """
-    Generates Ergogen-compatible keyboard YAML configuration files
-    from one or more `capistry.Cap` objects.
+    Represents an Ergogen keyboard layout configuration builder.
+
+    This class serves as a container and builder for Ergogen-compatible YAML
+    configurations based on individual `Cap` elements. It collects Caps,
+    applies a naming schema, and produces structured layout and
+    outline data conforming to Ergogen's configuration format.
 
     Parameters
     ----------
@@ -572,7 +584,7 @@ class Ergogen:
 
     @property
     def _config(self) -> ErgogenConfig:
-        logger.info(f"Creating {type(self).__name__} config for {len(self.caps)} cap(s)")
+        logger.info("Creating %s config for %s cap(s)", type(self).__name__, len(self.caps))
 
         schema = self.schema
         zone = Zone(key=KeyAttrs(spread=0, padding=0))
@@ -635,5 +647,5 @@ class Ergogen:
             Number of decimal places for floating-point values in the file.
         """
         yaml_str = self.to_yaml(precision=precision)
-        with open(filepath, "w") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             f.write(str(yaml_str))

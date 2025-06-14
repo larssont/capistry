@@ -122,14 +122,17 @@ class Sprue(ABC):
                 "length": (end - start).length,
             },
         )
+
+        min_length = 1e-4
         x_dir = end - start
-        if x_dir.length < 1e-4:
+
+        if x_dir.length < min_length:
             raise ValueError(
                 f"Sprue segment too short: distance between "
                 f"start {start} and end {end} is nearly zero."
             )
 
-        if x_dir.cross(Vector(0, 0, 1)).length < 1e-4:
+        if x_dir.cross(Vector(0, 0, 1)).length < min_length:
             raise ValueError(
                 f"Invalid direction: start {start} and end {end} vectors "
                 f"are parallel to the Z axis, which is not allowed."
@@ -200,6 +203,7 @@ class Sprue(ABC):
         return self._between(l2 @ 0 - (0, self._get_inset(c1)), l2 @ 1 + (0, self._get_inset(c2)))
 
     def __str__(self):
+        """Return a string representation showing the class name and diameter."""
         return f"{type(self).__name__} (Ø{self.diameter})"
 
 
