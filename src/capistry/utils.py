@@ -8,7 +8,7 @@ object introspection utilities.
 
 import math
 import random
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from functools import reduce
 from itertools import islice, tee
 from operator import mul
@@ -74,6 +74,8 @@ def spaced_points(
     3. Placing points starting from a random position on the circle
     4. Returning the points sorted within the [start, end) interval
     """
+    rand = rand or random.Random()
+
     if n <= 0:
         return []
     if start >= end:
@@ -81,7 +83,6 @@ def spaced_points(
     if n == 1:
         return [rand.uniform(start, end)]
 
-    rand = rand or random
     length = end - start
     min_spacing = n * tolerance
 
@@ -111,7 +112,7 @@ def spaced_points(
     return points
 
 
-def rotate_matrix(matrix: list[list[Any]], n: int = 1) -> list[list[Any]]:
+def rotate_matrix(matrix: Sequence[Sequence[Any]], n: int = 1) -> list[list[Any]]:
     """
     Rotate a 2D matrix by n quarter-turns clockwise.
 
@@ -121,8 +122,8 @@ def rotate_matrix(matrix: list[list[Any]], n: int = 1) -> list[list[Any]]:
 
     Parameters
     ----------
-    matrix : list[list[Any]]
-        A 2D rectangular matrix (list of lists) where all rows have equal length.
+    matrix : Sequence[Sequence[Any]]
+        A 2D rectangular matrix (sequence of sequences) where all rows have equal length.
         Must be non-empty.
     n : int, optional
         Number of 90-degree clockwise rotations to perform, by default 1.
@@ -174,10 +175,10 @@ def rotate_matrix(matrix: list[list[Any]], n: int = 1) -> list[list[Any]]:
             return [[matrix[rows - 1 - i][cols - 1 - j] for j in range(cols)] for i in range(rows)]
         case 3:
             return [[matrix[j][cols - 1 - i] for j in range(rows)] for i in range(cols)]
-    return [row[:] for row in matrix]
+    return [list(row) for row in matrix]
 
 
-def mirror_matrix(matrix: list[list[Any]], horizontal: bool = True) -> list[list[Any]]:
+def mirror_matrix(matrix: Sequence[Sequence[Any]], horizontal: bool = True) -> list[list[Any]]:
     """
     Mirror a 2D matrix along the horizontal or vertical axis.
 
@@ -187,8 +188,8 @@ def mirror_matrix(matrix: list[list[Any]], horizontal: bool = True) -> list[list
 
     Parameters
     ----------
-    matrix : list[list[Any]]
-        A 2D rectangular matrix (list of lists) where all rows have equal length.
+    matrix : Sequence[Sequence[Any]]
+        A 2D rectangular matrix (sequence of sequences) where all rows have equal length.
         Must be non-empty.
     horizontal : bool, optional
         Direction of mirroring. If True, mirror horizontally (left-right flip).
@@ -226,8 +227,8 @@ def mirror_matrix(matrix: list[list[Any]], horizontal: bool = True) -> list[list
         raise ValueError("Matrix must be non-empty and all rows must have the same length.")
 
     if horizontal:
-        return [row[::-1] for row in matrix]
-    return matrix[::-1]
+        return [list(row[::-1]) for row in matrix]
+    return [list(row) for row in matrix[::-1]]
 
 
 def gloc(node: Shape) -> Location:

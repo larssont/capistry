@@ -194,7 +194,7 @@ def angles_radians(
 def tensors(
     draw,
     value: Any = None,
-    shape: tuple[int | st.SearchStrategy[int]] | None = None,
+    shape: tuple[int | st.SearchStrategy[int], ...] | None = None,
     dynamic: bool = False,
 ) -> Any:
     """Generate nested lists with given shape and values."""
@@ -252,22 +252,22 @@ def tapers(
 def faces(
     draw,
     size: float | st.SearchStrategy[int | float] | None = None,
-    vertices: int | st.SearchStrategy[int] = 4,
+    sides: int | st.SearchStrategy[int] = 4,
 ):
-    """Generate polygon face by sampling a circle outline."""
-    vertices = unwrap(draw, vertices)
-    if vertices < 3:
+    """Generate a polygon face by sampling a circle outline."""
+    sides = unwrap(draw, sides)
+    if sides < 3:
         raise ValueError("Polygon must have at least 3 sides")
 
     if size is None:
         size = ints(10, 100)
 
     outline = Circle(unwrap(draw, size)).edges()[0]
-    vertices = [outline @ x for x in spaced_points(vertices, tolerance=0.025, rand=draw(randoms()))]
+    vectors = [outline @ x for x in spaced_points(sides, tolerance=0.025, rand=draw(randoms()))]
 
     with BuildSketch() as sk:
         with BuildLine():
-            Polyline(*vertices, close=True)
+            Polyline(*vectors, close=True)
         make_face()
 
     return sk.sketch.faces()[0]
@@ -276,9 +276,9 @@ def faces(
 @st.composite
 def vectors(
     draw,
-    x: float | st.SearchStrategy[float] = None,
-    y: float | st.SearchStrategy[float] = None,
-    z: float | st.SearchStrategy[float] = None,
+    x: float | st.SearchStrategy[float] | None = None,
+    y: float | st.SearchStrategy[float] | None = None,
+    z: float | st.SearchStrategy[float] | None = None,
 ) -> Vector:
     """Generate build123d.Vector with optional coordinates."""
     if x is None:
@@ -311,7 +311,7 @@ def vertices(
 def sprues_polygon(
     draw: st.DrawFn,
     diameteter: float | st.SearchStrategy[float] | None = None,
-    sides: int | st.SearchStrategy[int] = None,
+    sides: int | st.SearchStrategy[int] | None = None,
 ) -> SpruePolygon:
     """Generate SpruePolygon."""
     if sides is None:
@@ -351,10 +351,10 @@ def sprues(draw: st.DrawFn) -> Sprue:
 @st.composite
 def surfaces(
     draw,
-    offset: float | st.SearchStrategy[int | float] = None,
-    weight: float | st.SearchStrategy[int | float] = None,
-    rows: int | st.SearchStrategy[int] = None,
-    cols: int | st.SearchStrategy[int] = None,
+    offset: float | st.SearchStrategy[int | float] | None = None,
+    weight: float | st.SearchStrategy[int | float] | None = None,
+    rows: int | st.SearchStrategy[int] | None = None,
+    cols: int | st.SearchStrategy[int] | None = None,
 ) -> Surface:
     """Generate Surface with offsets and optional weights."""
     if offset is None:

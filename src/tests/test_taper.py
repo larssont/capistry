@@ -32,8 +32,6 @@ def test_uniform_constructor(value):
 @given(st.tapers())
 def test_equality(taper: Taper):
     """Test that Taper equality works correctly."""
-    assert taper == taper
-
     identical = Taper(front=taper.front, back=taper.back, left=taper.left, right=taper.right)
     assert taper == identical
 

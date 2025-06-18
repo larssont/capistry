@@ -1,7 +1,6 @@
 import math
 import operator
 from collections.abc import Iterable
-from typing import Iterable
 
 MIN_GEOMETRY_VALUE = 1e-4
 MAX_GEOMETRY_VALUE = 1000
@@ -11,7 +10,7 @@ TOL_GEOMETRY_REL = 1e-10
 
 def _is_iterable(obj):
     """Check if obj is iterable but not a string/bytes."""
-    return isinstance(obj, Iterable) and not isinstance(obj, (str, bytes))
+    return isinstance(obj, Iterable) and not isinstance(obj, str | bytes)
 
 
 def _approx_compare(actual, expected, op, *, rel, abs_, allow_approx_eq=True):
@@ -29,11 +28,11 @@ def _approx_compare(actual, expected, op, *, rel, abs_, allow_approx_eq=True):
     if actual_is_iter and expected_is_iter:
         try:
             pairs = zip(actual, expected, strict=True)
-        except ValueError:
+        except ValueError as e:
             raise AssertionError(
                 f"Length mismatch between actual and expected iterables: "
                 f"{len(actual)} != {len(expected)}"
-            )
+            ) from e
         for a, e in pairs:
             if not (
                 op(a, e) or (allow_approx_eq and math.isclose(a, e, rel_tol=rel, abs_tol=abs_))
@@ -69,7 +68,8 @@ def approx_ge(actual, expected, *, rel=TOL_GEOMETRY_REL, abs_=TOL_GEOMETRY_ABS):
         or _approx_compare(actual, expected, operator.eq, rel=rel, abs_=abs_)
     ):
         raise AssertionError(
-            f"Expected {actual} >= approx({expected}) (rel={rel:.1e}, abs={abs_:.1e}), but it was not."
+            f"Expected {actual} >= approx({expected}) (rel={rel:.1e}, abs={abs_:.1e}), "
+            f"but it was not."
         )
     return True
 
@@ -81,6 +81,7 @@ def approx_le(actual, expected, *, rel=TOL_GEOMETRY_REL, abs_=TOL_GEOMETRY_ABS):
         or _approx_compare(actual, expected, operator.eq, rel=rel, abs_=abs_)
     ):
         raise AssertionError(
-            f"Expected {actual} <= approx({expected}) (rel={rel:.1e}, abs={abs_:.1e}), but it was not."
+            f"Expected {actual} <= approx({expected}) (rel={rel:.1e}, abs={abs_:.1e}), "
+            f"but it was not."
         )
     return True

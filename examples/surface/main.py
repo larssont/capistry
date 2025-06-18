@@ -60,7 +60,9 @@ c1 = SlantedCap(
 
 c2 = c1.mirrored().locate(c1.top_right * Pos(X=gap))
 
-cap_parts = [c1.compound, c2.compound]
-show(*cap_parts)
+cap_compounds = [c1.compound, c2.compound]
+show(*cap_compounds)
 
-export_stl(Compound(cap_parts), file_path=Path(__file__).parent / "caps.stl")
+path = Path(__file__).parent
+export_step(Compound(cap_compounds), file_path=path / "caps.step")
+export_stl(Compound(cap_compounds), file_path=path / "caps.stl")

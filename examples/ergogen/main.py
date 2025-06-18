@@ -66,12 +66,16 @@ path = file_path = Path(__file__).parent / "config.yaml"
 # Create a schema specifying the zone and outline names
 schema = ErgogenSchema(zone_name="thumb", outline_name="thumb")
 
+
 # Create an Ergogen object using the caps and the custom schema
 ergogen = Ergogen(*caps, schema=schema)
 
 # Write the generated configuration to 'config.yaml'
 ergogen.write_yaml(path)
 
-
 show(*cap_compounds)
-export_stl(Compound(cap_compounds), file_path=Path(__file__).parent / "caps.stl")
+
+# Export caps;e
+path = Path(__file__).parent
+export_step(Compound(cap_compounds), file_path=path / "caps.step")
+export_stl(Compound(cap_compounds), file_path=path / "caps.stl")
