@@ -17,6 +17,7 @@ publish*.sh
 
 ### Except
 !/.pre-commit-config.yaml
+!/noxfile.py
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

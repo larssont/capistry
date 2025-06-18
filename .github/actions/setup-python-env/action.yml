@@ -1,0 +1,22 @@
+name: Set up Python Environment
+description: Common setup for Python, uv, and Nox
+
+inputs:
+  python-version-file:
+    required: false
+    default: "pyproject.toml"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: ${{ inputs.python-version-file }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+
+    - name: Install Nox
+      run: pipx install nox --python $(which python)
+      shell: bash
