@@ -1,11 +1,12 @@
 import pytest
-from hypothesis import given, note
+from hypothesis import HealthCheck, given, note, settings
 
 from capistry.compare import Comparable, Comparer
 
 from .util import strategy as st
 
 
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(st.tapers() | st.surfaces() | st.stems())
 def test_metrics(surface: Comparable):
     layout = surface.metrics

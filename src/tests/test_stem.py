@@ -2,7 +2,7 @@ import math
 from math import pi, sqrt
 
 from build123d import CenterOf, Location
-from hypothesis import given
+from hypothesis import HealthCheck, given, settings
 
 from capistry import ChocStem, MXStem, Stem
 from tests.util.approximate import approx_eq, approx_ge, approx_le
@@ -23,11 +23,13 @@ def is_stem_valid(stem: Stem):
     )
 
 
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(stems())
 def test_valid(stem: Stem):
     is_stem_valid(stem)
 
 
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(stems_mx(fillet=False))
 def test_mx_geometry(stem: MXStem):
     actual_min = stem.bounding_box().min
@@ -50,6 +52,7 @@ def test_mx_geometry(stem: MXStem):
     assert approx_eq(stem.center(center_of=CenterOf.BOUNDING_BOX), (0, 0, stem.cylinder_height / 2))
 
 
+@settings(suppress_health_check=(HealthCheck.too_slow,))
 @given(stems_choc(fillet=False))
 def test_choc_geometry(stem: ChocStem):
     actual_min = stem.bounding_box().min
