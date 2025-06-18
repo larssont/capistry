@@ -14,16 +14,18 @@ from .util import strategy as st
 
 
 @given(st.tensors(st.ints(-10, 10), shape=(2, st.ints(2, 10), st.ints(2, 10))))
-def test_weights_adjusted(tensor: list[list[int]]):
+def test_weights_adjusted(tensor: list[list[list[int | float]]]):
     offsets, weights = tensor[0], tensor[1]
 
     surface = Surface(offsets=offsets, weights=weights)
 
+    assert surface.weights is not None
+
     actual_weights = list(flatten(surface.weights))
 
     expected_weighs = list(flatten(weights))
-    expected_diff = 1 - min(min(expected_weighs), 1)
-    expected_weights = list(map(lambda w: w + expected_diff, expected_weighs))
+    expected_diff = 1 - min(*expected_weighs, 1)
+    expected_weights = [w + expected_diff for w in expected_weighs]
 
     assert actual_weights == expected_weights
     assert all(w >= 1.0 for w in actual_weights)
@@ -34,7 +36,7 @@ def test_scaled(surface: Surface, factor):
     scaled = surface.scaled(factor)
 
     for i, row in enumerate(scaled.offsets):
-        for j, v in enumerate(row):
+        for j, _ in enumerate(row):
             assert scaled.offsets[i][j] == pytest.approx(surface.offsets[i][j] * factor)
 
 
@@ -57,7 +59,7 @@ def test_flat(rows: int, cols: int):
     st.tensors(shape=(st.ints(2, 10), st.ints(2, 10))),
     st.tensors(shape=(st.ints(2, 10), st.ints(2, 10)), dynamic=True),
 )
-def test_irregular_rows(valid: list[list[int]], invalid: list[list[int]]):
+def test_irregular_rows(valid: list[list[int | float]], invalid: list[list[int | float]]):
     assume(len({len(r) for r in invalid}) > 1)
 
     Surface(offsets=valid, weights=valid)
@@ -77,7 +79,7 @@ def test_irregular_rows(valid: list[list[int]], invalid: list[list[int]]):
     st.tensors(shape=(st.ints(2, 10), st.ints(2, 10))),
     st.tensors(shape=(st.ints(1, 2), st.ints(1, 2))),
 )
-def test_invalid_row_col_count(valid: list[list[int]], invalid: list[list[int]]):
+def test_invalid_row_col_count(valid: list[list[int | float]], invalid: list[list[int | float]]):
     rows, cols = len(invalid), len(invalid[0])
     assume(min(rows, cols) < 2)
 
@@ -98,7 +100,7 @@ def test_invalid_row_col_count(valid: list[list[int]], invalid: list[list[int]])
     st.tensors(shape=(st.ints(5, 10), st.ints(5, 10))),
     st.tensors(shape=(st.ints(2, 4), st.ints(2, 4))),
 )
-def test_invalid_weights_shape(big: list[list[int]], small: list[list[int]]):
+def test_invalid_weights_shape(big: list[list[int | float]], small: list[list[int | float]]):
     Surface(offsets=big, weights=big)
     Surface(offsets=small, weights=small)
 
@@ -122,10 +124,10 @@ def test_invalid_weights_shape(big: list[list[int]], small: list[list[int]]):
     st.one_of(
         st.any_except(list, type(None)),
         st.tensors(value=st.any_except(list), shape=(2,)),
-        st.tensors(value=st.any_except(float | int), shape=(2, 2)),
+        st.tensors(value=st.any_except(float, int), shape=(2, 2)),
     ),
 )
-def test_invalid_type(valid: list[list[int]], invalid: Any):
+def test_invalid_type(valid: list[list[int | float]], invalid: Any):
     Surface(offsets=valid, weights=valid)
 
     cases = [
@@ -194,7 +196,7 @@ def test_mirrored(surface: Surface, horizontal: bool, include_weights: bool):
     assert mirrored.weights == expected_weights
 
 
-@given(st.surfaces(), st.faces(vertices=3))
+@given(st.surfaces(), st.faces(sides=3))
 def test_insufficient_vertices(surface: Surface, face: Face):
     with pytest.raises(ValueError, match=r"4 vertices"):
         surface.form_face(face)

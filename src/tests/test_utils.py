@@ -1,6 +1,7 @@
 from random import Random
 
 from hypothesis import example, given
+from more_itertools import pairwise
 
 from capistry.utils import spaced_points
 
@@ -24,5 +25,5 @@ def test_spaced_points(rand: Random, n: int, start: float, end: float, tol: floa
         assert start <= p <= end, f"Point {p} is out of range [{start}, {end}]"
 
     # Assert minimum spacing between consecutive points
-    for a, b in zip(sorted_points, sorted_points[1:]):
+    for a, b in pairwise(sorted_points):
         assert approx_ge((b - a), tol)

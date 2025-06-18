@@ -254,11 +254,7 @@ class MXStem(Stem):
     >>> mx_stem = MXStem()
 
     Create an MX stem with custom dimensions:
-    >>> custom_mx = MXStem(
-    ...     cylinder_height=4.0,
-    ...     cross_width=1.2,
-    ...     fillet_outer=0.3
-    ... )
+    >>> custom_mx = MXStem(cylinder_height=4.0, cross_width=1.2, fillet_outer=0.3)
     """
 
     cylinder_height: float = 3.8
@@ -402,23 +398,13 @@ class ChocStem(Stem):
     >>> choc_stem = ChocStem()
 
     Create a minimal Choc stem without optional features:
-    >>> minimal_choc = ChocStem(
-    ...     include_cross=False,
-    ...     include_arc=False
-    ... )
+    >>> minimal_choc = ChocStem(include_cross=False, include_arc=False)
 
     Create a custom Choc stem with taller legs:
-    >>> tall_choc = ChocStem(
-    ...     leg_height=3.5,
-    ...     fillet_legs_top=0.1
-    ... )
+    >>> tall_choc = ChocStem(leg_height=3.5, fillet_legs_top=0.1)
 
     Create a stem with custom arc curvature:
-    >>> curved_choc = ChocStem(
-    ...     arc_length_ratio=0.6,
-    ...     arc_width_ratio=0.3,
-    ...     include_arc=True
-    ... )
+    >>> curved_choc = ChocStem(arc_length_ratio=0.6, arc_width_ratio=0.3, include_arc=True)
 
     Notes
     -----

@@ -152,16 +152,11 @@ class Cap(Comparable, ABC):
     Create and manipulate a basic keycap:
 
     >>> taper = Taper(front=1.5, back=1.0, left=1.2, right=1.2)
-    >>> cap = RectangularCap(
-    ...     width=18,
-    ...     length=18,
-    ...     height=7,
-    ...     taper=taper
-    ... )
+    >>> cap = RectangularCap(width=18, length=18, height=7, taper=taper)
     >>>
     >>> # Transform the keycap
     >>> cap.move(Pos(19, 0, 0))  # Move to the right
-    >>> cap.rotate(Axis.Z, 5)    # Slight rotation
+    >>> cap.rotate(Axis.Z, 5)  # Slight rotation
     >>>
     >>> # Create taller variant
     >>> taller_cap = cap.clone()
@@ -169,7 +164,7 @@ class Cap(Comparable, ABC):
     >>> taller_cap.build()
     >>>
     >>> # Move taller keycap next to the first one
-    >>> taller_cap.locate(Rot(0, 0, 5) * cap.top_right) # Rotate then move
+    >>> taller_cap.locate(Rot(0, 0, 5) * cap.top_right)  # Rotate then move
 
     Notes
     -----
@@ -1259,7 +1254,7 @@ class RectangularCap(Cap):
 
     Create a larger keycap for special keys:
 
-    >>> spacebar = RectangularCap(width=18 * 6.25  - 1)
+    >>> spacebar = RectangularCap(width=18 * 6.25 - 1)
     """
 
     def __post_init__(self) -> None:

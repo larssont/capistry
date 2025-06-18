@@ -44,10 +44,7 @@ Save the configuration to a file:
 Use a custom naming schema:
 >>> from capistry.ergogen import ErgogenSchema
 >>> schema = ErgogenSchema(
-...     zone_name="left_hand",
-...     outline_name="left_hand",
-...     row_name="home",
-...     column_prefix="col_"
+...     zone_name="left_hand", outline_name="left_hand", row_name="home", column_prefix="col_"
 ... )
 >>> ergo = Ergogen(cap1, cap2, schema=schema)
 >>> ergo.write_yaml("left_hand.yaml")
@@ -66,6 +63,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal as Dec
 from itertools import pairwise
 from numbers import Number
+from os import PathLike
 from typing import Any, NamedTuple, Self
 
 import yaml
@@ -635,7 +633,7 @@ class Ergogen:
         """
         return self._config.to_yaml(encoder=_yaml_encoder(float_precision=precision))
 
-    def write_yaml(self, filepath: str = "config.yaml", precision: int = 3) -> None:
+    def write_yaml(self, filepath: PathLike | str = "config.yaml", precision: int = 3) -> None:
         """
         Write the Ergogen configuration to a YAML file.
 

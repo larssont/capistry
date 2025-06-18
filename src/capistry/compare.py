@@ -34,11 +34,7 @@ Examples
 ...     def metrics(self):
 ...         return MetricLayout(
 ...             owner=self,
-...             groups=(
-...                 MetricGroup("Basic", (
-...                     Metric("Value", lambda: self.value, "units"),
-...                 )),
-...             )
+...             groups=(MetricGroup("Basic", (Metric("Value", lambda: self.value, "units"),)),),
 ...         )
 >>>
 >>> obj1 = MyObject(10)
@@ -87,11 +83,14 @@ class Comparable(ABC):
     ...         return MetricLayout(
     ...             owner=self,
     ...             groups=(
-    ...                 MetricGroup("Temperature", (
-    ...                     Metric("Celsius", lambda: self.celsius, "°C"),
-    ...                     Metric("Fahrenheit", lambda: self.celsius * 9/5 + 32, "°F"),
-    ...                 )),
-    ...             )
+    ...                 MetricGroup(
+    ...                     "Temperature",
+    ...                     (
+    ...                         Metric("Celsius", lambda: self.celsius, "°C"),
+    ...                         Metric("Fahrenheit", lambda: self.celsius * 9 / 5 + 32, "°F"),
+    ...                     ),
+    ...                 ),
+    ...             ),
     ...         )
     """
 

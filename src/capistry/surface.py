@@ -23,7 +23,7 @@ from typing import Any, Self
 
 from attrs import Attribute, define, field
 from attrs.validators import optional
-from build123d import Face, Vector, Vertex
+from build123d import Face, Vector, VectorLike, Vertex
 from more_itertools import all_equal, collapse, flatten
 
 from capistry.compare import Comparable, Metric, MetricGroup, MetricLayout
@@ -487,10 +487,13 @@ class Surface(Comparable):
         )
 
         tl, tr, br, bl = [Vector(c) for c in self._sort_corners(vertices)]
+
         m, n = len(self.offsets), len(self.offsets[0])
+
         us = [j / (n - 1) for j in range(n)]
         vs = [i / (m - 1) for i in range(m)]
-        ctrl = [
+
+        points: list[list[VectorLike]] = [
             [
                 (
                     tl * (1 - u) * (1 - v)
@@ -504,7 +507,7 @@ class Surface(Comparable):
             for i, v in enumerate(vs)
         ]
 
-        face = Face.make_bezier_surface(points=ctrl, weights=self.weights)
+        face = Face.make_bezier_surface(points=points, weights=self.weights)
 
         logger.debug(
             "Successfully created bezier surface",
@@ -591,12 +594,12 @@ class Surface(Comparable):
                         ),
                         Metric(
                             "Weights - Max",
-                            lambda: max(collapse(self.weights, base_type=Number), default=""),
+                            lambda: max(collapse(self.weights or [], base_type=Number), default=""),
                             "mm",
                         ),
                         Metric(
                             "Weights - Min",
-                            lambda: min(collapse(self.weights, base_type=Number), default=""),
+                            lambda: min(collapse(self.weights or [], base_type=Number), default=""),
                             "mm",
                         ),
                     ),
