@@ -51,7 +51,9 @@ for i in range(cap_count):
 
     caps.append(t)
 
-cap_parts = [c.compound for c in caps]
+cap_compounds = [c.compound for c in caps]
+show(*cap_compounds)
 
-show(*cap_parts)
-export_stl(Compound(cap_parts), file_path=Path(__file__).parent / "caps.stl")
+path = Path(__file__).parent
+export_step(Compound(cap_compounds), file_path=path / "caps.step")
+export_stl(Compound(cap_compounds), file_path=path / "caps.stl")

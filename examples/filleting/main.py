@@ -59,9 +59,10 @@ c4.fillet_strategy = FilletMiddleTop()
 c4.build()
 c4.locate(c3.top_right * Pos(X=gap))
 
-caps = [c1.compound, c2.compound, c3.compound, c4.compound]
+cap_compounds = [c1.compound, c2.compound, c3.compound, c4.compound]
 
-show(*caps)
+show(*cap_compounds)
 
-
-export_stl(Compound(caps), file_path=Path(__file__).parent / "caps.stl")
+path = Path(__file__).parent
+export_step(Compound(cap_compounds), file_path=path / "caps.step")
+export_stl(Compound(cap_compounds), file_path=path / "caps.stl")

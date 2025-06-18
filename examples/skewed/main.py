@@ -51,7 +51,8 @@ for _ in range(cap_count - 1):
     cap.locate(caps[-1].top_right * Pos(gap))
     caps.append(cap)
 
-cap_parts = [c.compound for c in caps]
+cap_compounds = [c.compound for c in caps]
 
-show(*cap_parts)
-export_stl(Compound(cap_parts), file_path=Path(__file__).parent / "caps.stl")
+path = Path(__file__).parent
+export_step(Compound(cap_compounds), file_path=path / "caps.step")
+export_stl(Compound(cap_compounds), file_path=path / "caps.stl")

@@ -45,10 +45,12 @@ cap = SlantedCap(
 
 
 # Create a panel of 8 normal caps, and 8 mirrored  ones
-panel = Panel(items=[PanelItem(cap, quantity=8, mirror=True)], sprue=SprueCylinder(), col_count=4)
+panel = Panel(items=[PanelItem(cap, quantity=8, mirror=True)], sprue=SprueCylinder())
 
 # Show the panel
 show(panel.compound)
 
-# Export the panel to .STL
-export_stl(panel.compound, file_path=Path(__file__).parent / "caps.stl")
+# Export the panel
+path = Path(__file__).parent
+export_step(panel.compound, file_path=path / "panel.step")
+export_stl(panel.compound, file_path=path / "panel.stl")
